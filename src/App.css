@@ -1,37 +1,86 @@
+
+/* Giao diện chung */
 .App {
   text-align: center;
+  width: 100%;
+  min-height: 100vh;
+  overflow-x: hidden;
+  box-sizing: border-box;
 }
 
+/* Logo */
 .App-logo {
   height: 40vmin;
+  max-width: 80%;
+  object-fit: contain;
   pointer-events: none;
 }
 
+/* Hiệu ứng logo */
 @media (prefers-reduced-motion: no-preference) {
   .App-logo {
     animation: App-logo-spin infinite 20s linear;
   }
 }
 
+/* Header */
 .App-header {
   background-color: #282c34;
   min-height: 100vh;
+  width: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   font-size: calc(10px + 2vmin);
   color: white;
+  padding: 20px;
+  box-sizing: border-box;
 }
 
+/* Link */
 .App-link {
   color: #61dafb;
+  text-decoration: none;
 }
 
+/* Tablet */
+@media screen and (max-width: 768px) {
+  .App-header {
+    min-height: 100vh;
+    padding: 20px 15px;
+    font-size: 18px;
+  }
+
+  .App-logo {
+    height: 30vmin;
+  }
+}
+
+/* Điện thoại */
+@media screen and (max-width: 480px) {
+  .App-header {
+    min-height: 100svh;
+    padding: 15px 10px;
+    font-size: 16px;
+  }
+
+  .App-logo {
+    height: 25vmin;
+    max-width: 70%;
+  }
+
+  .App-link {
+    font-size: 14px;
+  }
+}
+
+/* Animation */
 @keyframes App-logo-spin {
   from {
     transform: rotate(0deg);
   }
+
   to {
     transform: rotate(360deg);
   }

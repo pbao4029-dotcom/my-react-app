@@ -90,7 +90,15 @@ function AppContent() {
     );
   }
 
-  return (
+ return (
+  <Box
+    sx={{
+      width: '100%',
+      minHeight: '100vh',
+      overflowX: 'hidden',
+      boxSizing: 'border-box',
+    }}
+  >
     <Routes>
       <Route element={<Layout />}>
         <Route
@@ -125,10 +133,7 @@ function AppContent() {
           }
         />
 
-        <Route
-          path="/suppliers"
-          element={<Suppliers />}
-        />
+        <Route path="/suppliers" element={<Suppliers />} />
 
         <Route
           path="/stock-in"
@@ -154,13 +159,12 @@ function AppContent() {
 
         <Route
           path="/transactions"
-          element={
-            <Transactions transactions={transactions} />
-          }
+          element={<Transactions transactions={transactions} />}
         />
       </Route>
     </Routes>
-  );
+  </Box>
+);
 }
 
 export default function App() {

@@ -34,24 +34,20 @@ const menuItems = [
   { text: 'Giao dịch', path: '/transactions', icon: <ReceiptLong /> },
 ];
 
-export default function Sidebar() {
-  return (
-    <Drawer
-      variant="permanent"
+export default function Sidebar({ mobileOpen = false, onClose }) {
+
+  const sidebarContent = (
+    <Box
       sx={{
         width: drawerWidth,
-        flexShrink: 0,
-        '& .MuiDrawer-paper': {
-          width: drawerWidth,
-          boxSizing: 'border-box',
-          backgroundColor: '#172554',
-          color: '#fff',
-          borderRight: 0,
-        },
+        height: '100%',
+        backgroundColor: '#172554',
+        color: '#fff',
       }}
     >
       <Toolbar>
         <Inventory sx={{ mr: 1, fontSize: 30 }} />
+
         <Typography variant="h6" fontWeight="bold">
           INVENTORY
         </Typography>
@@ -71,21 +67,29 @@ export default function Sidebar() {
               key={item.path}
               component={NavLink}
               to={item.path}
+              onClick={onClose}
               sx={{
                 borderRadius: 2,
                 mb: 0.5,
                 color: '#cbd5e1',
+
                 '&.active': {
                   backgroundColor: '#2563eb',
                   color: '#fff',
                 },
+
                 '&:hover': {
                   backgroundColor: '#1e40af',
                   color: '#fff',
                 },
               }}
             >
-              <ListItemIcon sx={{ color: 'inherit', minWidth: 40 }}>
+              <ListItemIcon
+                sx={{
+                  color: 'inherit',
+                  minWidth: 40,
+                }}
+              >
                 {item.icon}
               </ListItemIcon>
 
@@ -94,6 +98,53 @@ export default function Sidebar() {
           ))}
         </List>
       </Box>
-    </Drawer>
+    </Box>
+  );
+
+  return (
+    <>
+      {/* Sidebar Laptop */}
+      <Drawer
+        variant="permanent"
+        sx={{
+          display: { xs: 'none', md: 'block' },
+          width: drawerWidth,
+          flexShrink: 0,
+
+          '& .MuiDrawer-paper': {
+            width: drawerWidth,
+            boxSizing: 'border-box',
+            backgroundColor: '#172554',
+            color: '#fff',
+            borderRight: 0,
+          },
+        }}
+      >
+        {sidebarContent}
+      </Drawer>
+
+      {/* Sidebar Mobile */}
+      <Drawer
+        variant="temporary"
+        open={mobileOpen}
+        onClose={onClose}
+        ModalProps={{
+          keepMounted: true,
+        }}
+        sx={{
+          display: { xs: 'block', md: 'none' },
+
+          '& .MuiDrawer-paper': {
+            width: drawerWidth,
+            boxSizing: 'border-box',
+            backgroundColor: '#172554',
+            color: '#fff',
+            borderRight: 0,
+          },
+        }}
+      >
+        {sidebarContent}
+      </Drawer>
+    </>
   );
 }
