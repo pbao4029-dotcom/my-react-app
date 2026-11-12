@@ -1,0 +1,43 @@
+
+import React from 'react';
+import ReactDOM from 'react-dom/client';
+
+import { ThemeProvider, createTheme } from '@mui/material/styles';
+import CssBaseline from '@mui/material/CssBaseline';
+
+import App from './App';
+
+const theme = createTheme({
+  palette: {
+    primary: {
+      main: '#2563eb',
+    },
+    secondary: {
+      main: '#9333ea',
+    },
+    background: {
+      default: '#f1f5f9',
+    },
+  },
+
+  typography: {
+    fontFamily: 'Roboto, Arial, sans-serif',
+  },
+
+  shape: {
+    borderRadius: 10,
+  },
+});
+
+const root = ReactDOM.createRoot(
+  document.getElementById('root')
+);
+
+root.render(
+  <React.StrictMode>
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+      <App />
+    </ThemeProvider>
+  </React.StrictMode>
+);
