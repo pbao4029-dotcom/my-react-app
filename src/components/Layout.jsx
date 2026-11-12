@@ -5,7 +5,6 @@ import {
   Box,
   Toolbar,
   IconButton,
-  Drawer,
   useMediaQuery,
 } from '@mui/material';
 
@@ -17,12 +16,18 @@ import Sidebar from './Sidebar';
 import Header from './Header';
 
 export default function Layout() {
-  const isMobile = useMediaQuery('(max-width:768px)');
+  const isMobile = useMediaQuery((theme) =>
+    theme.breakpoints.down('md')
+  );
 
   const [mobileOpen, setMobileOpen] = useState(false);
 
   const handleDrawerToggle = () => {
-    setMobileOpen(!mobileOpen);
+    setMobileOpen((prev) => !prev);
+  };
+
+  const handleDrawerClose = () => {
+    setMobileOpen(false);
   };
 
   return (
@@ -35,66 +40,44 @@ export default function Layout() {
         overflowX: 'hidden',
       }}
     >
-      {/* Sidebar trên Laptop */}
-      {!isMobile && <Sidebar />}
-
-      {/* Sidebar trên điện thoại */}
-      <Drawer
-        variant="temporary"
-        open={mobileOpen}
-        onClose={handleDrawerToggle}
-        ModalProps={{
-          keepMounted: true,
-        }}
-        sx={{
-          display: { xs: 'block', md: 'none' },
-          '& .MuiDrawer-paper': {
-            width: 260,
-            boxSizing: 'border-box',
-          },
-        }}
-      >
-        <Sidebar />
-      </Drawer>
+      {/* Sidebar */}
+      <Sidebar
+        mobileOpen={mobileOpen}
+        onClose={handleDrawerClose}
+      />
 
       {/* Khu vực chính */}
       <Box
         sx={{
           flexGrow: 1,
-          width: 0,
           minWidth: 0,
+          width: 0,
           display: 'flex',
           flexDirection: 'column',
         }}
       >
-        {/* Header */}
-        <Box
-          sx={{
-            display: 'flex',
-            alignItems: 'center',
-            width: '100%',
-          }}
-        >
-          {isMobile && (
-            <IconButton
-              onClick={handleDrawerToggle}
-              sx={{
-                position: 'fixed',
-                top: 10,
-                left: 10,
-                zIndex: 1300,
-                bgcolor: 'white',
-                boxShadow: 2,
-              }}
-            >
-              <MenuIcon />
-            </IconButton>
-          )}
+        {/* Nút mở menu trên điện thoại */}
+        {isMobile && (
+          <IconButton
+            onClick={handleDrawerToggle}
+            sx={{
+              position: 'fixed',
+              top: 10,
+              left: 10,
+              zIndex: 1200,
+              bgcolor: '#fff',
+              boxShadow: 2,
+              '&:hover': {
+                bgcolor: '#e2e8f0',
+              },
+            }}
+          >
+            <MenuIcon />
+          </IconButton>
+        )}
 
-          <Box sx={{ width: '100%', minWidth: 0 }}>
-            <Header />
-          </Box>
-        </Box>
+        {/* Header */}
+        <Header />
 
         {/* Nội dung */}
         <Box
@@ -112,7 +95,6 @@ export default function Layout() {
           }}
         >
           <Toolbar />
-
           <Outlet />
         </Box>
       </Box>

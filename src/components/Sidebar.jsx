@@ -7,6 +7,7 @@ import {
   MoveToInbox,
   Outbox,
   ReceiptLong,
+  Close,
 } from '@mui/icons-material';
 
 import {
@@ -18,6 +19,7 @@ import {
   ListItemText,
   Toolbar,
   Typography,
+  IconButton,
 } from '@mui/material';
 
 import { NavLink } from 'react-router-dom';
@@ -35,22 +37,33 @@ const menuItems = [
 ];
 
 export default function Sidebar({ mobileOpen = false, onClose }) {
-
   const sidebarContent = (
     <Box
       sx={{
         width: drawerWidth,
         height: '100%',
-        backgroundColor: '#172554',
+        minHeight: '100%',
+        bgcolor: '#172554',
         color: '#fff',
       }}
     >
-      <Toolbar>
-        <Inventory sx={{ mr: 1, fontSize: 30 }} />
+      <Toolbar sx={{ display: 'flex', justifyContent: 'space-between' }}>
+        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+          <Inventory sx={{ mr: 1, fontSize: 30 }} />
+          <Typography variant="h6" fontWeight="bold">
+            INVENTORY
+          </Typography>
+        </Box>
 
-        <Typography variant="h6" fontWeight="bold">
-          INVENTORY
-        </Typography>
+        <IconButton
+          onClick={onClose}
+          sx={{
+            display: { xs: 'flex', md: 'none' },
+            color: '#fff',
+          }}
+        >
+          <Close />
+        </IconButton>
       </Toolbar>
 
       <Box sx={{ px: 2, py: 2 }}>
@@ -74,12 +87,12 @@ export default function Sidebar({ mobileOpen = false, onClose }) {
                 color: '#cbd5e1',
 
                 '&.active': {
-                  backgroundColor: '#2563eb',
+                  bgcolor: '#2563eb',
                   color: '#fff',
                 },
 
                 '&:hover': {
-                  backgroundColor: '#1e40af',
+                  bgcolor: '#1e40af',
                   color: '#fff',
                 },
               }}
@@ -103,27 +116,26 @@ export default function Sidebar({ mobileOpen = false, onClose }) {
 
   return (
     <>
-      {/* Sidebar Laptop */}
+      {/* Sidebar laptop */}
       <Drawer
         variant="permanent"
         sx={{
           display: { xs: 'none', md: 'block' },
           width: drawerWidth,
           flexShrink: 0,
-
           '& .MuiDrawer-paper': {
             width: drawerWidth,
             boxSizing: 'border-box',
-            backgroundColor: '#172554',
+            bgcolor: '#172554',
             color: '#fff',
-            borderRight: 0,
+            border: 0,
           },
         }}
       >
         {sidebarContent}
       </Drawer>
 
-      {/* Sidebar Mobile */}
+      {/* Sidebar điện thoại */}
       <Drawer
         variant="temporary"
         open={mobileOpen}
@@ -133,13 +145,13 @@ export default function Sidebar({ mobileOpen = false, onClose }) {
         }}
         sx={{
           display: { xs: 'block', md: 'none' },
-
+          zIndex: 1400,
           '& .MuiDrawer-paper': {
             width: drawerWidth,
             boxSizing: 'border-box',
-            backgroundColor: '#172554',
+            bgcolor: '#172554',
             color: '#fff',
-            borderRight: 0,
+            border: 0,
           },
         }}
       >
