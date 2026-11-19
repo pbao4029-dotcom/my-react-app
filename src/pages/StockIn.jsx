@@ -19,7 +19,7 @@ import {
 import {
     MoveToInbox,
     Add,
-    DeleteOutline,
+    Delete,
     Inventory2Outlined,
 } from '@mui/icons-material';
 
@@ -58,7 +58,10 @@ export default function StockIn({
             if (exists) {
                 return previous.map((item) =>
                     String(item.productId) === String(product.id)
-                        ? { ...item, quantity: Number(item.quantity) + amount }
+                        ? {
+                            ...item,
+                            quantity: Number(item.quantity) + amount,
+                        }
                         : item
                 );
             }
@@ -375,7 +378,7 @@ export default function StockIn({
                                                     handleRemoveProduct(item.productId)
                                                 }
                                             >
-                                                <DeleteOutline />
+                                                <Delete />
                                             </IconButton>
                                         </Box>
                                     </Paper>
