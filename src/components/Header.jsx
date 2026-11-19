@@ -97,7 +97,7 @@ export default function Header() {
 
           <Avatar
             sx={{
-              bgcolor: '#2563eb',
+              bgcolor: '#57b0f4',
               width: {
                 xs: 30,
                 md: 38,
