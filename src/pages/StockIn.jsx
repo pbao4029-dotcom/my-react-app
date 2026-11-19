@@ -29,14 +29,13 @@ export default function StockIn({
     onAddTransaction,
 }) {
     const [productId, setProductId] = useState('');
-    const [quantity, setQuantity] = useState(1);
+    const [quantity, setQuantity] = useState('1');
     const [note, setNote] = useState('');
     const [items, setItems] = useState([]);
 
-    // Thêm sản phẩm vào phiếu nhập
     const handleAddProduct = () => {
         const product = products.find(
-            (item) => String(item.id) === String(productId)
+            (p) => String(p.id) === String(productId)
         );
 
         const amount = Number(quantity);
@@ -47,87 +46,107 @@ export default function StockIn({
         }
 
         if (!Number.isInteger(amount) || amount <= 0) {
-            alert('Số lượng nhập phải là số nguyên lớn hơn 0.');
+            alert('Số lượng phải là số nguyên lớn hơn 0.');
             return;
         }
 
-        const existingItem = items.find(
-            (item) => String(item.productId) === String(product.id)
-        );
-
-        if (existingItem) {
-            setItems((previous) =>
-                previous.map((item) =>
-                    String(item.productId) === String(product.id)
-                        ? {
-                            ...item,
-                            quantity: Number(item.quantity) + amount,
-                        }
-                        : item
-                )
+        setItems((previous) => {
+            const exists = previous.find(
+                (item) => String(item.productId) === String(product.id)
             );
-        } else {
-            setItems((previous) => [
+
+            if (exists) {
+                return previous.map((item) =>
+                    String(item.productId) === String(product.id)
+                        ? { ...item, quantity: Number(item.quantity) + amount }
+                        : item
+                );
+            }
+
+            return [
                 ...previous,
                 {
                     productId: product.id,
                     productName: product.title,
-                    stock: Number(product.stock) || 0,
                     quantity: amount,
                 },
-            ]);
-        }
+            ];
+        });
 
         setProductId('');
-        setQuantity(1);
+        setQuantity('1');
     };
 
-    // Thay đổi số lượng trong danh sách
     const handleQuantityChange = (id, value) => {
         setItems((previous) =>
             previous.map((item) =>
-                item.productId === id
+                String(item.productId) === String(id)
                     ? { ...item, quantity: value }
                     : item
             )
         );
     };
 
-    // Xóa sản phẩm khỏi phiếu
     const handleRemoveProduct = (id) => {
         setItems((previous) =>
-            previous.filter((item) => item.productId !== id)
+            previous.filter(
+                (item) => String(item.productId) !== String(id)
+            )
         );
     };
 
-    // Tổng số lượng hàng nhập
     const totalQuantity = items.reduce(
         (total, item) => total + (Number(item.quantity) || 0),
         0
     );
 
-    // Xác nhận nhập nhiều sản phẩm
     const handleSubmit = () => {
         if (items.length === 0) {
             alert('Vui lòng thêm ít nhất một sản phẩm.');
             return;
         }
 
-        // Kiểm tra toàn bộ số lượng trước khi cập nhật
         for (const item of items) {
             const amount = Number(item.quantity);
 
             if (!Number.isInteger(amount) || amount <= 0) {
-                alert(
-                    `Số lượng của sản phẩm "${item.productName}" không hợp lệ.`
-                );
+                alert(`Số lượng của "${item.productName}" không hợp lệ.`);
+                return;
+            }
+
+            const exists = products.some(
+                (p) => String(p.id) === String(item.productId)
+            );
+
+            if (!exists) {
+                alert(`Không tìm thấy sản phẩm "${item.productName}".`);
                 return;
             }
         }
 
         const transactionDate = new Date().toISOString();
 
-        // Tạo bản cập nhật tồn kho
+        const transactions = items.map((item, index) => {
+            const product = products.find(
+                (p) => String(p.id) === String(item.productId)
+            );
+
+            const stockBefore = Number(product.stock) || 0;
+            const amount = Number(item.quantity);
+
+            return {
+                id: Date.now() + index,
+                productId: item.productId,
+                productName: item.productName,
+                type: 'IN',
+                quantity: amount,
+                stockBefore,
+                stockAfter: stockBefore + amount,
+                note,
+                date: transactionDate,
+            };
+        });
+
         const updatedProducts = products.map((product) => {
             const importedItem = items.find(
                 (item) =>
@@ -144,49 +163,29 @@ export default function StockIn({
             };
         });
 
-        // Tạo giao dịch cho từng sản phẩm
-        const transactions = items.map((item, index) => {
-            const product = products.find(
-                (p) => String(p.id) === String(item.productId)
-            );
-
-            const stockBefore = Number(product?.stock) || 0;
-            const amount = Number(item.quantity);
-
-            return {
-                id: Date.now() + index,
-                productId: item.productId,
-                productName: item.productName,
-                type: 'IN',
-                quantity: amount,
-                stockBefore,
-                stockAfter: stockBefore + amount,
-                note,
-                date: transactionDate,
-            };
-        });
-
-        // Cập nhật tồn kho
         setProducts(updatedProducts);
 
-        // Lưu từng giao dịch
         transactions.forEach((transaction) => {
-            onAddTransaction(transaction);
+            if (onAddTransaction) {
+                onAddTransaction(transaction);
+            }
         });
 
-        // Reset phiếu nhập
+        const importedCount = items.length;
+        const importedTotal = totalQuantity;
+
         setItems([]);
         setProductId('');
-        setQuantity(1);
+        setQuantity('1');
         setNote('');
 
         alert(
-            `Nhập kho thành công ${items.length} sản phẩm, tổng cộng ${totalQuantity} sản phẩm!`
+            `Nhập kho thành công ${importedCount} sản phẩm, tổng số lượng ${importedTotal}!`
         );
     };
 
     return (
-        <Box>
+        <Box sx={{ width: '100%' }}>
             <Typography variant="h5" fontWeight="bold" mb={3}>
                 Nhập kho
             </Typography>
@@ -199,14 +198,11 @@ export default function StockIn({
                 }}
             >
                 <CardContent sx={{ p: 3 }}>
-                    {/* HEADER */}
-                    <Box
-                        sx={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: 1,
-                            mb: 3,
-                        }}
+                    <Stack
+                        direction="row"
+                        alignItems="center"
+                        spacing={1}
+                        mb={3}
                     >
                         <MoveToInbox color="primary" />
 
@@ -222,9 +218,8 @@ export default function StockIn({
                             color="primary"
                             variant="outlined"
                         />
-                    </Box>
+                    </Stack>
 
-                    {/* FORM THÊM SẢN PHẨM */}
                     <Paper
                         variant="outlined"
                         sx={{
@@ -253,19 +248,16 @@ export default function StockIn({
                                 select
                                 label="Chọn sản phẩm"
                                 value={productId}
-                                onChange={(event) =>
-                                    setProductId(event.target.value)
-                                }
+                                onChange={(e) => setProductId(e.target.value)}
                                 fullWidth
                                 size="small"
                             >
                                 {products.map((product) => (
                                     <MenuItem
                                         key={product.id}
-                                        value={product.id}
+                                        value={String(product.id)}
                                     >
-                                        {product.title} — Tồn:{' '}
-                                        {product.stock}
+                                        {product.title} — Tồn: {product.stock}
                                     </MenuItem>
                                 ))}
                             </TextField>
@@ -274,9 +266,7 @@ export default function StockIn({
                                 label="Số lượng nhập"
                                 type="number"
                                 value={quantity}
-                                onChange={(event) =>
-                                    setQuantity(event.target.value)
-                                }
+                                onChange={(e) => setQuantity(e.target.value)}
                                 inputProps={{ min: 1 }}
                                 fullWidth
                                 size="small"
@@ -297,7 +287,6 @@ export default function StockIn({
                         </Box>
                     </Paper>
 
-                    {/* DANH SÁCH SẢN PHẨM */}
                     <Typography fontWeight="bold" mb={2}>
                         Danh sách hàng hóa nhập
                     </Typography>
@@ -314,11 +303,7 @@ export default function StockIn({
                             }}
                         >
                             <Inventory2Outlined
-                                sx={{
-                                    fontSize: 45,
-                                    color: '#9ca3af',
-                                    mb: 1,
-                                }}
+                                sx={{ fontSize: 45, color: '#9ca3af', mb: 1 }}
                             />
 
                             <Typography color="text.secondary">
@@ -334,73 +319,71 @@ export default function StockIn({
                         </Paper>
                     ) : (
                         <Stack spacing={1.5} mb={3}>
-                            {items.map((item, index) => (
-                                <Paper
-                                    key={item.productId}
-                                    variant="outlined"
-                                    sx={{
-                                        p: 2,
-                                        borderRadius: 2,
-                                    }}
-                                >
-                                    <Box
-                                        sx={{
-                                            display: 'grid',
-                                            gridTemplateColumns: {
-                                                xs: '1fr',
-                                                sm: '1fr 120px 45px',
-                                            },
-                                            gap: 2,
-                                            alignItems: 'center',
-                                        }}
+                            {items.map((item, index) => {
+                                const product = products.find(
+                                    (p) =>
+                                        String(p.id) === String(item.productId)
+                                );
+
+                                return (
+                                    <Paper
+                                        key={item.productId}
+                                        variant="outlined"
+                                        sx={{ p: 2, borderRadius: 2 }}
                                     >
-                                        <Box>
-                                            <Typography
-                                                fontWeight="bold"
-                                                fontSize={14}
-                                            >
-                                                {index + 1}. {item.productName}
-                                            </Typography>
-
-                                            <Typography
-                                                variant="caption"
-                                                color="text.secondary"
-                                            >
-                                                Tồn kho hiện tại: {item.stock}
-                                            </Typography>
-                                        </Box>
-
-                                        <TextField
-                                            size="small"
-                                            type="number"
-                                            label="Số lượng"
-                                            value={item.quantity}
-                                            inputProps={{ min: 1 }}
-                                            onChange={(event) =>
-                                                handleQuantityChange(
-                                                    item.productId,
-                                                    event.target.value
-                                                )
-                                            }
-                                        />
-
-                                        <IconButton
-                                            color="error"
-                                            onClick={() =>
-                                                handleRemoveProduct(
-                                                    item.productId
-                                                )
-                                            }
+                                        <Box
+                                            sx={{
+                                                display: 'grid',
+                                                gridTemplateColumns: {
+                                                    xs: '1fr',
+                                                    sm: '1fr 120px 45px',
+                                                },
+                                                gap: 2,
+                                                alignItems: 'center',
+                                            }}
                                         >
-                                            <DeleteOutline />
-                                        </IconButton>
-                                    </Box>
-                                </Paper>
-                            ))}
+                                            <Box>
+                                                <Typography fontWeight="bold" fontSize={14}>
+                                                    {index + 1}. {item.productName}
+                                                </Typography>
+
+                                                <Typography
+                                                    variant="caption"
+                                                    color="text.secondary"
+                                                >
+                                                    Tồn kho hiện tại: {product?.stock ?? 0}
+                                                </Typography>
+                                            </Box>
+
+                                            <TextField
+                                                size="small"
+                                                type="number"
+                                                label="Số lượng"
+                                                value={item.quantity}
+                                                inputProps={{ min: 1 }}
+                                                onChange={(e) =>
+                                                    handleQuantityChange(
+                                                        item.productId,
+                                                        e.target.value
+                                                    )
+                                                }
+                                            />
+
+                                            <IconButton
+                                                color="error"
+                                                onClick={() =>
+                                                    handleRemoveProduct(item.productId)
+                                                }
+                                            >
+                                                <DeleteOutline />
+                                            </IconButton>
+                                        </Box>
+                                    </Paper>
+                                );
+                            })}
                         </Stack>
                     )}
 
-                    {/* TỔNG SỐ LƯỢNG */}
                     <Paper
                         sx={{
                             p: 2,
@@ -418,11 +401,7 @@ export default function StockIn({
                                 Tổng số sản phẩm:
                             </Typography>
 
-                            <Typography
-                                variant="h6"
-                                fontWeight="bold"
-                                color="primary"
-                            >
+                            <Typography variant="h6" fontWeight="bold" color="primary">
                                 {items.length}
                             </Typography>
                         </Stack>
@@ -438,28 +417,22 @@ export default function StockIn({
                                 Tổng số lượng nhập:
                             </Typography>
 
-                            <Typography
-                                variant="h6"
-                                fontWeight="bold"
-                                color="primary"
-                            >
+                            <Typography variant="h6" fontWeight="bold" color="primary">
                                 {totalQuantity}
                             </Typography>
                         </Stack>
                     </Paper>
 
-                    {/* GHI CHÚ */}
                     <TextField
                         label="Ghi chú phiếu nhập"
                         value={note}
-                        onChange={(event) => setNote(event.target.value)}
+                        onChange={(e) => setNote(e.target.value)}
                         multiline
                         rows={3}
                         fullWidth
                         sx={{ mb: 3 }}
                     />
 
-                    {/* BUTTON XÁC NHẬN */}
                     <Button
                         variant="contained"
                         size="large"
