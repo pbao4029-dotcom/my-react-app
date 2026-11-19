@@ -1,4 +1,5 @@
-import React from 'react';
+
+import React, { useEffect, useState } from 'react';
 
 import {
   Box,
@@ -12,10 +13,24 @@ import {
   DialogActions,
   IconButton,
   Stack,
+  Grid,
   Chip,
+  Avatar,
+  Divider,
 } from '@mui/material';
 
-import { Add, Delete } from '@mui/icons-material';
+import {
+  Add,
+  Delete,
+  Category,
+  Inventory2,
+  Storefront,
+  Phone,
+  Email,
+  LocationOn,
+} from '@mui/icons-material';
+
+// ==================== DỮ LIỆU NHÀ CUNG CẤP ====================
 
 const initialSuppliers = [
   {
@@ -41,50 +56,95 @@ const initialSuppliers = [
   },
 ];
 
-export function Categories({ categories, products }) {
-  const [items, setItems] = React.useState(categories);
-  const [open, setOpen] = React.useState(false);
-  const [name, setName] = React.useState('');
+const emptyForm = {
+  name: '',
+  phone: '',
+  email: '',
+  address: '',
+};
 
-  React.useEffect(() => {
-    setItems((prev) => [...new Set([...prev, ...categories])]);
+// ==================== QUẢN LÝ DANH MỤC ====================
+
+export function Categories({
+  categories = [],
+  setCategories,
+  products = [],
+}) {
+  const [items, setItems] = useState(categories);
+  const [open, setOpen] = useState(false);
+  const [name, setName] = useState('');
+
+  useEffect(() => {
+    setItems(categories);
   }, [categories]);
 
-  const add = () => {
-    const value = name.trim().toLowerCase();
+  const handleAdd = () => {
+    const value = name.trim();
 
-    if (!value) return;
+    if (!value) {
+      alert('Vui lòng nhập tên danh mục.');
+      return;
+    }
 
-    if (items.includes(value)) {
+    const exists = items.some(
+      (item) => item.toLowerCase() === value.toLowerCase()
+    );
+
+    if (exists) {
       alert('Danh mục đã tồn tại.');
       return;
     }
 
-    setItems((prev) => [...prev, value]);
+    if (setCategories) {
+      setCategories((prev) => [...prev, value]);
+    } else {
+      setItems((prev) => [...prev, value]);
+    }
+
     setName('');
     setOpen(false);
   };
 
-  const remove = (category) => {
-    if (products.some((p) => p.category === category)) {
+  const handleRemove = (category) => {
+    const isUsed = products.some(
+      (product) => product.category === category
+    );
+
+    if (isUsed) {
       alert('Không thể xóa danh mục đang có sản phẩm.');
       return;
     }
 
-    if (window.confirm('Bạn có muốn xóa danh mục này?')) {
-      setItems((prev) => prev.filter((item) => item !== category));
+    if (window.confirm('Bạn có chắc muốn xóa danh mục này?')) {
+      if (setCategories) {
+        setCategories((prev) =>
+          prev.filter((item) => item !== category)
+        );
+      } else {
+        setItems((prev) =>
+          prev.filter((item) => item !== category)
+        );
+      }
     }
   };
 
   return (
     <Box>
-      <Box display="flex" justifyContent="space-between" mb={3} gap={2}>
+      <Box
+        display="flex"
+        justifyContent="space-between"
+        alignItems={{ xs: 'flex-start', sm: 'center' }}
+        flexDirection={{ xs: 'column', sm: 'row' }}
+        gap={2}
+        mb={4}
+      >
         <Box>
-          <Typography variant="h5" fontWeight={800}>
+          <Typography variant="h5" fontWeight={800} color="#172554">
             Quản lý danh mục
           </Typography>
-          <Typography color="text.secondary">
-            Phân loại các sản phẩm trong kho.
+
+          <Typography color="text.secondary" mt={0.5}>
+            Phân loại và quản lý các sản phẩm trong kho hàng.
           </Typography>
         </Box>
 
@@ -92,65 +152,248 @@ export function Categories({ categories, products }) {
           variant="contained"
           startIcon={<Add />}
           onClick={() => setOpen(true)}
+          sx={{
+            borderRadius: 2.5,
+            px: 3,
+            py: 1.2,
+            textTransform: 'none',
+            fontWeight: 700,
+            background: 'linear-gradient(135deg, #1e40af, #3b82f6)',
+            '&:hover': {
+              background: 'linear-gradient(135deg, #1e3a8a, #2563eb)',
+            },
+          }}
         >
           Thêm danh mục
         </Button>
       </Box>
 
-      <Paper elevation={0} sx={{ p: 2, borderRadius: 3 }}>
-        {items.map((item) => (
-          <Box
-            key={item}
-            display="flex"
-            alignItems="center"
-            justifyContent="space-between"
-            borderBottom="1px solid #eee"
-            py={1.5}
+      <Grid container spacing={2} mb={3}>
+        <Grid item xs={12} sm={6}>
+          <Paper
+            elevation={0}
+            sx={{
+              p: 2.5,
+              borderRadius: 3,
+              border: '1px solid #e2e8f0',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 2,
+            }}
           >
+            <Avatar
+              sx={{
+                bgcolor: '#dbeafe',
+                color: '#2563eb',
+                borderRadius: 2,
+              }}
+            >
+              <Category />
+            </Avatar>
+
             <Box>
-              <Typography fontWeight={600}>{item}</Typography>
-              <Typography color="text.secondary" fontSize={12}>
-                {products.filter((p) => p.category === item).length} sản phẩm
+              <Typography color="text.secondary" fontSize={13}>
+                Tổng danh mục
+              </Typography>
+              <Typography variant="h5" fontWeight={800} color="#172554">
+                {items.length}
               </Typography>
             </Box>
+          </Paper>
+        </Grid>
 
-            <IconButton color="error" onClick={() => remove(item)}>
-              <Delete />
-            </IconButton>
-          </Box>
-        ))}
-      </Paper>
+        <Grid item xs={12} sm={6}>
+          <Paper
+            elevation={0}
+            sx={{
+              p: 2.5,
+              borderRadius: 3,
+              border: '1px solid #e2e8f0',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 2,
+            }}
+          >
+            <Avatar
+              sx={{
+                bgcolor: '#dcfce7',
+                color: '#16a34a',
+                borderRadius: 2,
+              }}
+            >
+              <Inventory2 />
+            </Avatar>
 
-      <Dialog open={open} onClose={() => setOpen(false)} fullWidth maxWidth="xs">
-        <DialogTitle>Thêm danh mục</DialogTitle>
+            <Box>
+              <Typography color="text.secondary" fontSize={13}>
+                Tổng sản phẩm
+              </Typography>
+              <Typography variant="h5" fontWeight={800} color="#172554">
+                {products.length}
+              </Typography>
+            </Box>
+          </Paper>
+        </Grid>
+      </Grid>
+
+      <Grid container spacing={2}>
+        {items.length > 0 ? (
+          items.map((item, index) => {
+            const count = products.filter(
+              (product) => product.category === item
+            ).length;
+
+            return (
+              <Grid item xs={12} sm={6} md={4} key={item}>
+                <Paper
+                  elevation={0}
+                  sx={{
+                    p: 2.5,
+                    borderRadius: 3,
+                    border: '1px solid #e2e8f0',
+                    transition: '0.25s',
+                    '&:hover': {
+                      transform: 'translateY(-4px)',
+                      boxShadow: '0 8px 24px rgba(15,23,42,0.08)',
+                      borderColor: '#93c5fd',
+                    },
+                  }}
+                >
+                  <Stack
+                    direction="row"
+                    alignItems="center"
+                    justifyContent="space-between"
+                  >
+                    <Stack direction="row" alignItems="center" spacing={1.5}>
+                      <Avatar
+                        sx={{
+                          bgcolor: '#eff6ff',
+                          color: '#2563eb',
+                          borderRadius: 2,
+                        }}
+                      >
+                        <Category />
+                      </Avatar>
+
+                      <Box>
+                        <Typography fontWeight={700} color="#172554">
+                          {item}
+                        </Typography>
+                        <Typography fontSize={12} color="text.secondary">
+                          Danh mục #{index + 1}
+                        </Typography>
+                      </Box>
+                    </Stack>
+
+                    <IconButton
+                      onClick={() => handleRemove(item)}
+                      sx={{
+                        color: '#ef4444',
+                        bgcolor: '#fef2f2',
+                        '&:hover': {
+                          bgcolor: '#fee2e2',
+                        },
+                      }}
+                    >
+                      <Delete fontSize="small" />
+                    </IconButton>
+                  </Stack>
+
+                  <Box
+                    mt={2.5}
+                    pt={2}
+                    borderTop="1px solid #f1f5f9"
+                    display="flex"
+                    justifyContent="space-between"
+                    alignItems="center"
+                  >
+                    <Typography fontSize={13} color="text.secondary">
+                      Số lượng sản phẩm
+                    </Typography>
+
+                    <Chip
+                      label={`${count} sản phẩm`}
+                      size="small"
+                      sx={{
+                        bgcolor: '#dbeafe',
+                        color: '#1d4ed8',
+                        fontWeight: 700,
+                      }}
+                    />
+                  </Box>
+                </Paper>
+              </Grid>
+            );
+          })
+        ) : (
+          <Grid item xs={12}>
+            <Paper
+              sx={{
+                p: 5,
+                textAlign: 'center',
+                borderRadius: 3,
+              }}
+            >
+              <Category sx={{ fontSize: 48, color: '#94a3b8' }} />
+              <Typography fontWeight={700}>
+                Chưa có danh mục nào
+              </Typography>
+            </Paper>
+          </Grid>
+        )}
+      </Grid>
+
+      <Dialog
+        open={open}
+        onClose={() => setOpen(false)}
+        fullWidth
+        maxWidth="xs"
+        PaperProps={{
+          sx: { borderRadius: 3 },
+        }}
+      >
+        <DialogTitle fontWeight={800} color="#172554">
+          Thêm danh mục mới
+        </DialogTitle>
+
         <DialogContent>
           <TextField
             autoFocus
             fullWidth
             label="Tên danh mục"
+            placeholder="Ví dụ: Đồ điện tử"
             value={name}
             onChange={(e) => setName(e.target.value)}
             sx={{ mt: 1 }}
           />
         </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setOpen(false)}>Hủy</Button>
-          <Button variant="contained" onClick={add}>Thêm</Button>
+
+        <DialogActions sx={{ px: 3, pb: 2 }}>
+          <Button onClick={() => setOpen(false)}>
+            Hủy
+          </Button>
+          <Button variant="contained" onClick={handleAdd}>
+            Thêm
+          </Button>
         </DialogActions>
       </Dialog>
     </Box>
   );
 }
 
+// ==================== QUẢN LÝ NHÀ CUNG CẤP ====================
+
 export function Suppliers() {
-  const [suppliers, setSuppliers] = React.useState(initialSuppliers);
-  const [open, setOpen] = React.useState(false);
-  const [form, setForm] = React.useState({
-    name: '',
-    phone: '',
-    email: '',
-    address: '',
-  });
+  const [suppliers, setSuppliers] = useState(initialSuppliers);
+  const [open, setOpen] = useState(false);
+  const [form, setForm] = useState(emptyForm);
+
+  const handleChange = (field, value) => {
+    setForm((prev) => ({
+      ...prev,
+      [field]: value,
+    }));
+  };
 
   const handleAdd = () => {
     if (!form.name.trim() || !form.phone.trim()) {
@@ -160,28 +403,45 @@ export function Suppliers() {
 
     setSuppliers((prev) => [
       ...prev,
-      { ...form, id: Date.now() },
+      {
+        ...form,
+        name: form.name.trim(),
+        phone: form.phone.trim(),
+        email: form.email.trim(),
+        address: form.address.trim(),
+        id: Date.now(),
+      },
     ]);
 
-    setForm({ name: '', phone: '', email: '', address: '' });
+    setForm(emptyForm);
     setOpen(false);
   };
 
   const handleDelete = (id) => {
-    if (window.confirm('Xóa nhà cung cấp này?')) {
-      setSuppliers((prev) => prev.filter((item) => item.id !== id));
+    if (window.confirm('Bạn có chắc muốn xóa nhà cung cấp này?')) {
+      setSuppliers((prev) =>
+        prev.filter((item) => item.id !== id)
+      );
     }
   };
 
   return (
     <Box>
-      <Box display="flex" justifyContent="space-between" mb={3} gap={2}>
+      <Box
+        display="flex"
+        justifyContent="space-between"
+        alignItems={{ xs: 'flex-start', sm: 'center' }}
+        flexDirection={{ xs: 'column', sm: 'row' }}
+        gap={2}
+        mb={4}
+      >
         <Box>
-          <Typography variant="h5" fontWeight={800}>
-            Nhà cung cấp
+          <Typography variant="h5" fontWeight={800} color="#172554">
+            Quản lý nhà cung cấp
           </Typography>
-          <Typography color="text.secondary">
-            Quản lý thông tin các nhà cung cấp hàng hóa.
+
+          <Typography color="text.secondary" mt={0.5}>
+            Quản lý thông tin các đối tác cung cấp hàng hóa.
           </Typography>
         </Box>
 
@@ -189,79 +449,218 @@ export function Suppliers() {
           variant="contained"
           startIcon={<Add />}
           onClick={() => setOpen(true)}
+          sx={{
+            borderRadius: 2.5,
+            px: 3,
+            py: 1.2,
+            textTransform: 'none',
+            fontWeight: 700,
+            background: 'linear-gradient(135deg, #1e40af, #3b82f6)',
+            '&:hover': {
+              background: 'linear-gradient(135deg, #1e3a8a, #2563eb)',
+            },
+          }}
         >
           Thêm nhà cung cấp
         </Button>
       </Box>
 
-      <Stack spacing={2}>
-        {suppliers.map((supplier) => (
-          <Paper
-            key={supplier.id}
-            elevation={0}
-            sx={{
-              p: 2.5,
-              borderRadius: 3,
-              border: '1px solid #e5e7eb',
-            }}
-          >
-            <Box
-              display="flex"
-              justifyContent="space-between"
-              alignItems="flex-start"
-              gap={2}
-            >
-              <Box>
-                <Typography fontWeight={700} fontSize={16}>
-                  {supplier.name}
-                </Typography>
-                <Typography color="text.secondary" mt={1}>
-                  SĐT: {supplier.phone}
-                </Typography>
-                <Typography color="text.secondary">
-                  Email: {supplier.email || 'Chưa cập nhật'}
-                </Typography>
-                <Typography color="text.secondary">
-                  Địa chỉ: {supplier.address || 'Chưa cập nhật'}
-                </Typography>
-              </Box>
+      <Paper
+        elevation={0}
+        sx={{
+          p: 2.5,
+          mb: 3,
+          borderRadius: 3,
+          border: '1px solid #e2e8f0',
+          display: 'flex',
+          alignItems: 'center',
+          gap: 2,
+        }}
+      >
+        <Avatar
+          sx={{
+            bgcolor: '#dbeafe',
+            color: '#2563eb',
+            borderRadius: 2,
+          }}
+        >
+          <Storefront />
+        </Avatar>
 
-              <IconButton
-                color="error"
-                onClick={() => handleDelete(supplier.id)}
+        <Box>
+          <Typography fontSize={13} color="text.secondary">
+            Tổng số nhà cung cấp
+          </Typography>
+          <Typography variant="h5" fontWeight={800} color="#172554">
+            {suppliers.length}
+          </Typography>
+        </Box>
+      </Paper>
+
+      <Grid container spacing={2}>
+        {suppliers.length > 0 ? (
+          suppliers.map((supplier) => (
+            <Grid item xs={12} md={6} lg={4} key={supplier.id}>
+              <Paper
+                elevation={0}
+                sx={{
+                  height: '100%',
+                  p: 2.5,
+                  borderRadius: 3,
+                  border: '1px solid #e2e8f0',
+                  transition: '0.25s',
+                  '&:hover': {
+                    transform: 'translateY(-4px)',
+                    boxShadow: '0 8px 24px rgba(15,23,42,0.08)',
+                    borderColor: '#93c5fd',
+                  },
+                }}
               >
-                <Delete />
-              </IconButton>
-            </Box>
-          </Paper>
-        ))}
-      </Stack>
+                <Stack
+                  direction="row"
+                  alignItems="center"
+                  justifyContent="space-between"
+                  spacing={1}
+                >
+                  <Stack direction="row" alignItems="center" spacing={1.5}>
+                    <Avatar
+                      sx={{
+                        bgcolor: '#eff6ff',
+                        color: '#2563eb',
+                        borderRadius: 2,
+                      }}
+                    >
+                      <Storefront />
+                    </Avatar>
 
-      <Dialog open={open} onClose={() => setOpen(false)} fullWidth maxWidth="sm">
-        <DialogTitle>Thêm nhà cung cấp</DialogTitle>
+                    <Box>
+                      <Typography fontWeight={700} color="#172554">
+                        {supplier.name}
+                      </Typography>
+                      <Typography fontSize={12} color="text.secondary">
+                        Nhà cung cấp
+                      </Typography>
+                    </Box>
+                  </Stack>
+
+                  <IconButton
+                    onClick={() => handleDelete(supplier.id)}
+                    sx={{
+                      color: '#ef4444',
+                      bgcolor: '#fef2f2',
+                      '&:hover': {
+                        bgcolor: '#fee2e2',
+                      },
+                    }}
+                  >
+                    <Delete fontSize="small" />
+                  </IconButton>
+                </Stack>
+
+                <Divider sx={{ my: 2 }} />
+
+                <Stack spacing={1.5}>
+                  <Stack direction="row" alignItems="center" spacing={1.5}>
+                    <Phone sx={{ fontSize: 19, color: '#2563eb' }} />
+                    <Typography fontSize={13} color="#475569">
+                      {supplier.phone}
+                    </Typography>
+                  </Stack>
+
+                  <Stack direction="row" alignItems="center" spacing={1.5}>
+                    <Email sx={{ fontSize: 19, color: '#2563eb' }} />
+                    <Typography
+                      fontSize={13}
+                      color="#475569"
+                      sx={{ wordBreak: 'break-word' }}
+                    >
+                      {supplier.email || 'Chưa cập nhật'}
+                    </Typography>
+                  </Stack>
+
+                  <Stack direction="row" alignItems="center" spacing={1.5}>
+                    <LocationOn sx={{ fontSize: 19, color: '#2563eb' }} />
+                    <Typography fontSize={13} color="#475569">
+                      {supplier.address || 'Chưa cập nhật'}
+                    </Typography>
+                  </Stack>
+                </Stack>
+              </Paper>
+            </Grid>
+          ))
+        ) : (
+          <Grid item xs={12}>
+            <Paper
+              sx={{
+                p: 5,
+                textAlign: 'center',
+                borderRadius: 3,
+              }}
+            >
+              <Storefront sx={{ fontSize: 48, color: '#94a3b8' }} />
+              <Typography fontWeight={700}>
+                Chưa có nhà cung cấp
+              </Typography>
+            </Paper>
+          </Grid>
+        )}
+      </Grid>
+
+      <Dialog
+        open={open}
+        onClose={() => setOpen(false)}
+        fullWidth
+        maxWidth="sm"
+        PaperProps={{
+          sx: { borderRadius: 3 },
+        }}
+      >
+        <DialogTitle fontWeight={800} color="#172554">
+          Thêm nhà cung cấp mới
+        </DialogTitle>
+
         <DialogContent>
           <Stack spacing={2} mt={1}>
-            {[
-              ['name', 'Tên nhà cung cấp'],
-              ['phone', 'Số điện thoại'],
-              ['email', 'Email'],
-              ['address', 'Địa chỉ'],
-            ].map(([field, label]) => (
-              <TextField
-                key={field}
-                label={label}
-                fullWidth
-                value={form[field]}
-                onChange={(e) =>
-                  setForm({ ...form, [field]: e.target.value })
-                }
-              />
-            ))}
+            <TextField
+              label="Tên nhà cung cấp"
+              fullWidth
+              required
+              value={form.name}
+              onChange={(e) => handleChange('name', e.target.value)}
+            />
+
+            <TextField
+              label="Số điện thoại"
+              fullWidth
+              required
+              value={form.phone}
+              onChange={(e) => handleChange('phone', e.target.value)}
+            />
+
+            <TextField
+              label="Email"
+              type="email"
+              fullWidth
+              value={form.email}
+              onChange={(e) => handleChange('email', e.target.value)}
+            />
+
+            <TextField
+              label="Địa chỉ"
+              fullWidth
+              value={form.address}
+              onChange={(e) => handleChange('address', e.target.value)}
+            />
           </Stack>
         </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setOpen(false)}>Hủy</Button>
-          <Button variant="contained" onClick={handleAdd}>Lưu</Button>
+
+        <DialogActions sx={{ px: 3, pb: 2 }}>
+          <Button onClick={() => setOpen(false)}>
+            Hủy
+          </Button>
+          <Button variant="contained" onClick={handleAdd}>
+            Lưu nhà cung cấp
+          </Button>
         </DialogActions>
       </Dialog>
     </Box>
