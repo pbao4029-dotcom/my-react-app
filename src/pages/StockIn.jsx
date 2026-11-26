@@ -128,6 +128,10 @@ export default function StockIn({
         }
 
         const transactionDate = new Date().toISOString();
+        const transactionTimestamp = Date.now();
+
+        // Tạo một mã chung cho toàn bộ phiếu nhập
+        const transactionCode = `GD${transactionTimestamp}`;
 
         const transactions = items.map((item, index) => {
             const product = products.find(
@@ -138,7 +142,8 @@ export default function StockIn({
             const amount = Number(item.quantity);
 
             return {
-                id: Date.now() + index,
+                id: transactionTimestamp + index,
+                transactionCode,
                 productId: item.productId,
                 productName: item.productName,
                 type: 'IN',
@@ -183,7 +188,7 @@ export default function StockIn({
         setNote('');
 
         alert(
-            `Nhập kho thành công ${importedCount} sản phẩm, tổng số lượng ${importedTotal}!`
+            `Nhập kho thành công!\nMã giao dịch: ${transactionCode}\n${importedCount} loại sản phẩm, tổng số lượng ${importedTotal}.`
         );
     };
 

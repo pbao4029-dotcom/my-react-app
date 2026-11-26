@@ -157,6 +157,10 @@ export default function StockOut({
         }
 
         const transactionDate = new Date().toISOString();
+        const transactionTimestamp = Date.now();
+
+        // Tạo một mã chung cho toàn bộ phiếu xuất
+        const transactionCode = `GD${transactionTimestamp}`;
 
         // Tạo lịch sử giao dịch cho từng sản phẩm
         const transactions = items.map((item, index) => {
@@ -168,7 +172,8 @@ export default function StockOut({
             const amount = Number(item.quantity);
 
             return {
-                id: Date.now() + index,
+                id: transactionTimestamp + index,
+                transactionCode,
                 productId: item.productId,
                 productName: item.productName,
                 type: 'OUT',
@@ -216,7 +221,7 @@ export default function StockOut({
         setNote('');
 
         alert(
-            `Xuất kho thành công ${exportedCount} loại sản phẩm, tổng số lượng ${exportedTotal}!`
+            `Xuất kho thành công!\nMã giao dịch: ${transactionCode}\n${exportedCount} loại sản phẩm, tổng số lượng ${exportedTotal}.`
         );
     };
 
