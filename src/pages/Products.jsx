@@ -34,7 +34,11 @@ const emptyForm = {
   minStock: 10,
 };
 
-export default function Products({ products = [], setProducts, categories = [] }) {
+export default function Products({
+  products = [],
+  setProducts,
+  categories = [],
+}) {
   const [search, setSearch] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('');
   const [open, setOpen] = useState(false);
@@ -44,7 +48,7 @@ export default function Products({ products = [], setProducts, categories = [] }
   const filteredProducts = useMemo(() => {
     return products.filter((product) => {
       const matchesSearch =
-        product.title.toLowerCase().includes(search.toLowerCase()) ||
+        (product.title || '').toLowerCase().includes(search.toLowerCase()) ||
         (product.brand || '').toLowerCase().includes(search.toLowerCase());
 
       const matchesCategory =
@@ -130,10 +134,57 @@ export default function Products({ products = [], setProducts, categories = [] }
 
     try {
       await removeProduct(id);
-      setProducts((previous) => previous.filter((item) => item.id !== id));
+
+      setProducts((previous) =>
+        previous.filter((item) => item.id !== id)
+      );
     } catch (error) {
       console.error(error);
       alert('Không thể xóa sản phẩm.');
+    }
+  };
+
+  // Lưu dữ liệu khi chỉnh sửa trực tiếp trên bảng
+  const processRowUpdate = async (newRow, oldRow) => {
+    try {
+      const updatedRow = {
+        ...newRow,
+        title: (newRow.title || '').trim(),
+        brand: newRow.brand || '',
+        price: Number(newRow.price),
+        stock: Number(newRow.stock),
+      };
+
+      if (!updatedRow.title) {
+        throw new Error('Tên sản phẩm không được để trống.');
+      }
+
+      if (!updatedRow.category) {
+        throw new Error('Vui lòng chọn danh mục.');
+      }
+
+      if (
+        updatedRow.price < 0 ||
+        updatedRow.stock < 0
+      ) {
+        throw new Error('Giá và số lượng không được âm.');
+      }
+
+      await editProduct(updatedRow.id, updatedRow);
+
+      setProducts((previous) =>
+        previous.map((item) =>
+          item.id === updatedRow.id
+            ? { ...item, ...updatedRow }
+            : item
+        )
+      );
+
+      return updatedRow;
+    } catch (error) {
+      console.error(error);
+      alert(error.message || 'Không thể cập nhật sản phẩm.');
+      throw error;
     }
   };
 
@@ -149,24 +200,31 @@ export default function Products({ products = [], setProducts, categories = [] }
       headerName: 'Tên sản phẩm',
       flex: 1.5,
       minWidth: 120,
+      editable: true,
     },
     {
       field: 'category',
       headerName: 'Danh mục',
       flex: 0.9,
       minWidth: 90,
+      type: 'singleSelect',
+      valueOptions: categories,
+      editable: true,
     },
     {
       field: 'brand',
       headerName: 'Thương hiệu',
       flex: 0.8,
       minWidth: 85,
+      editable: true,
     },
     {
       field: 'price',
       headerName: 'Giá',
       flex: 0.9,
       minWidth: 95,
+      type: 'number',
+      editable: true,
       renderCell: (params) => formatCurrency(params.row.price),
     },
     {
@@ -174,6 +232,8 @@ export default function Products({ products = [], setProducts, categories = [] }
       headerName: 'Tồn kho',
       flex: 0.6,
       minWidth: 65,
+      type: 'number',
+      editable: true,
     },
     {
       field: 'status',
@@ -306,6 +366,9 @@ export default function Products({ products = [], setProducts, categories = [] }
           '& .MuiDataGrid-columnHeader': {
             px: 1,
           },
+          '& .MuiDataGrid-cell--editing': {
+            bgcolor: '#eff6ff',
+          },
         }}
       >
         <DataGrid
@@ -323,6 +386,8 @@ export default function Products({ products = [], setProducts, categories = [] }
           }}
           disableRowSelectionOnClick
           disableColumnMenu
+          processRowUpdate={processRowUpdate}
+          onProcessRowUpdateError={(error) => console.error(error)}
           sx={{
             border: '1px solid #e2e8f0',
             borderRadius: 2,
