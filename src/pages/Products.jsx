@@ -34,7 +34,7 @@ const emptyForm = {
   minStock: 10,
 };
 
-export default function Products({ products, setProducts, categories }) {
+export default function Products({ products = [], setProducts, categories = [] }) {
   const [search, setSearch] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('');
   const [open, setOpen] = useState(false);
@@ -141,39 +141,45 @@ export default function Products({ products, setProducts, categories }) {
     {
       field: 'id',
       headerName: 'ID',
-      width: 75,
+      flex: 0.45,
+      minWidth: 55,
     },
     {
       field: 'title',
       headerName: 'Tên sản phẩm',
-      flex: 1,
-      minWidth: 180,
+      flex: 1.5,
+      minWidth: 120,
     },
     {
       field: 'category',
       headerName: 'Danh mục',
-      width: 150,
+      flex: 0.9,
+      minWidth: 90,
     },
     {
       field: 'brand',
       headerName: 'Thương hiệu',
-      width: 130,
+      flex: 0.8,
+      minWidth: 85,
     },
     {
       field: 'price',
       headerName: 'Giá',
-      width: 140,
+      flex: 0.9,
+      minWidth: 95,
       renderCell: (params) => formatCurrency(params.row.price),
     },
     {
       field: 'stock',
       headerName: 'Tồn kho',
-      width: 100,
+      flex: 0.6,
+      minWidth: 65,
     },
     {
       field: 'status',
       headerName: 'Trạng thái',
-      width: 120,
+      flex: 0.75,
+      minWidth: 85,
       renderCell: (params) => {
         const status = getStockStatus(
           params.row.stock,
@@ -185,6 +191,10 @@ export default function Products({ products, setProducts, categories }) {
             label={status.label}
             color={status.color}
             size="small"
+            sx={{
+              fontSize: 11,
+              height: 24,
+            }}
           />
         );
       },
@@ -192,13 +202,16 @@ export default function Products({ products, setProducts, categories }) {
     {
       field: 'actions',
       headerName: 'Thao tác',
-      width: 130,
+      flex: 0.8,
+      minWidth: 85,
       sortable: false,
+      filterable: false,
       renderCell: (params) => (
-        <Box>
+        <Box sx={{ display: 'flex', alignItems: 'center' }}>
           <Button
             size="small"
             onClick={() => handleOpenEdit(params.row)}
+            sx={{ minWidth: 32, px: 0.5 }}
           >
             <Edit fontSize="small" />
           </Button>
@@ -207,6 +220,7 @@ export default function Products({ products, setProducts, categories }) {
             size="small"
             color="error"
             onClick={() => handleDelete(params.row.id)}
+            sx={{ minWidth: 32, px: 0.5 }}
           >
             <Delete fontSize="small" />
           </Button>
@@ -216,13 +230,13 @@ export default function Products({ products, setProducts, categories }) {
   ];
 
   return (
-    <Box>
+    <Box sx={{ width: '100%', minWidth: 0 }}>
       <Box
         sx={{
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
-          mb: 3,
+          mb: 2.5,
           gap: 2,
           flexWrap: 'wrap',
         }}
@@ -235,18 +249,26 @@ export default function Products({ products, setProducts, categories }) {
           variant="contained"
           startIcon={<Add />}
           onClick={handleOpenAdd}
+          sx={{ textTransform: 'none' }}
         >
           Thêm sản phẩm
         </Button>
       </Box>
 
-      <Box sx={{ display: 'flex', gap: 2, mb: 2, flexWrap: 'wrap' }}>
+      <Box
+        sx={{
+          display: 'flex',
+          gap: 1.5,
+          mb: 2,
+          flexWrap: 'wrap',
+        }}
+      >
         <TextField
           size="small"
           label="Tìm kiếm sản phẩm"
           value={search}
           onChange={(event) => setSearch(event.target.value)}
-          sx={{ minWidth: 220 }}
+          sx={{ width: { xs: '100%', sm: 240 } }}
         />
 
         <TextField
@@ -255,7 +277,7 @@ export default function Products({ products, setProducts, categories }) {
           label="Danh mục"
           value={categoryFilter}
           onChange={(event) => setCategoryFilter(event.target.value)}
-          sx={{ minWidth: 180 }}
+          sx={{ width: { xs: '100%', sm: 180 } }}
         >
           <MenuItem value="">Tất cả danh mục</MenuItem>
 
@@ -267,7 +289,25 @@ export default function Products({ products, setProducts, categories }) {
         </TextField>
       </Box>
 
-      <Box sx={{ height: 540, width: '100%', bgcolor: '#fff' }}>
+      <Box
+        sx={{
+          height: 540,
+          width: '100%',
+          minWidth: 0,
+          bgcolor: '#fff',
+          overflow: 'hidden',
+          '& .MuiDataGrid-columnHeaders': {
+            bgcolor: '#f8fafc',
+            fontWeight: 'bold',
+          },
+          '& .MuiDataGrid-cell': {
+            px: 1,
+          },
+          '& .MuiDataGrid-columnHeader': {
+            px: 1,
+          },
+        }}
+      >
         <DataGrid
           rows={filteredProducts}
           columns={columns}
@@ -282,6 +322,14 @@ export default function Products({ products, setProducts, categories }) {
             },
           }}
           disableRowSelectionOnClick
+          disableColumnMenu
+          sx={{
+            border: '1px solid #e2e8f0',
+            borderRadius: 2,
+            '& .MuiDataGrid-row:hover': {
+              bgcolor: '#f8fafc',
+            },
+          }}
         />
       </Box>
 

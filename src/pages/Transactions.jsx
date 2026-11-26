@@ -25,13 +25,15 @@ export default function Transactions({ transactions = [] }) {
             const transactionCode =
                 item.transactionCode || `GD${item.id}`;
 
+            const searchValue = search.toLowerCase();
+
             const matchesSearch =
                 (item.productName || '')
                     .toLowerCase()
-                    .includes(search.toLowerCase()) ||
+                    .includes(searchValue) ||
                 String(transactionCode)
                     .toLowerCase()
-                    .includes(search.toLowerCase());
+                    .includes(searchValue);
 
             return matchesType && matchesSearch;
         });
@@ -41,20 +43,22 @@ export default function Transactions({ transactions = [] }) {
         {
             field: 'transactionCode',
             headerName: 'Mã giao dịch',
-            width: 180,
+            flex: 1,
+            minWidth: 110,
             renderCell: (params) =>
                 params.row.transactionCode || `GD${params.row.id}`,
         },
         {
             field: 'productName',
             headerName: 'Sản phẩm',
-            flex: 1,
-            minWidth: 180,
+            flex: 1.4,
+            minWidth: 120,
         },
         {
             field: 'type',
             headerName: 'Loại giao dịch',
-            width: 150,
+            flex: 0.9,
+            minWidth: 100,
             renderCell: (params) => (
                 <Chip
                     label={
@@ -74,34 +78,38 @@ export default function Transactions({ transactions = [] }) {
         {
             field: 'quantity',
             headerName: 'Số lượng',
-            width: 100,
+            flex: 0.65,
+            minWidth: 75,
         },
         {
             field: 'stockBefore',
             headerName: 'Tồn trước',
-            width: 110,
+            flex: 0.7,
+            minWidth: 80,
         },
         {
             field: 'stockAfter',
             headerName: 'Tồn sau',
-            width: 110,
+            flex: 0.7,
+            minWidth: 80,
         },
         {
             field: 'date',
             headerName: 'Ngày giao dịch',
-            width: 140,
+            flex: 0.95,
+            minWidth: 105,
             renderCell: (params) => formatDate(params.value),
         },
         {
             field: 'note',
             headerName: 'Ghi chú',
             flex: 1,
-            minWidth: 150,
+            minWidth: 100,
         },
     ];
 
     return (
-        <Box>
+        <Box sx={{ width: '100%', minWidth: 0 }}>
             <Typography variant="h5" fontWeight="bold" mb={3}>
                 Lịch sử giao dịch
             </Typography>
@@ -112,6 +120,7 @@ export default function Transactions({ transactions = [] }) {
                     gap: 2,
                     mb: 2,
                     flexWrap: 'wrap',
+                    width: '100%',
                 }}
             >
                 <TextField
@@ -119,6 +128,9 @@ export default function Transactions({ transactions = [] }) {
                     label="Tìm theo mã hoặc tên sản phẩm"
                     value={search}
                     onChange={(event) => setSearch(event.target.value)}
+                    sx={{
+                        width: { xs: '100%', sm: 280 },
+                    }}
                 />
 
                 <TextField
@@ -127,7 +139,9 @@ export default function Transactions({ transactions = [] }) {
                     label="Loại giao dịch"
                     value={filter}
                     onChange={(event) => setFilter(event.target.value)}
-                    sx={{ minWidth: 170 }}
+                    sx={{
+                        width: { xs: '100%', sm: 170 },
+                    }}
                 >
                     <MenuItem value="ALL">Tất cả</MenuItem>
                     <MenuItem value="IN">Nhập kho</MenuItem>
@@ -139,7 +153,18 @@ export default function Transactions({ transactions = [] }) {
                 sx={{
                     height: 540,
                     width: '100%',
+                    minWidth: 0,
+                    overflow: 'hidden',
                     bgcolor: '#fff',
+                    borderRadius: 2,
+                    '& .MuiDataGrid-cell': {
+                        px: 1,
+                        fontSize: 13,
+                    },
+                    '& .MuiDataGrid-columnHeader': {
+                        px: 1,
+                        fontSize: 13,
+                    },
                 }}
             >
                 <DataGrid
@@ -156,6 +181,16 @@ export default function Transactions({ transactions = [] }) {
                         },
                     }}
                     disableRowSelectionOnClick
+                    disableColumnMenu
+                    density="compact"
+                    sx={{
+                        width: '100%',
+                        border: '1px solid #e2e8f0',
+                        '& .MuiDataGrid-columnHeaders': {
+                            bgcolor: '#f8fafc',
+                            fontWeight: 600,
+                        },
+                    }}
                 />
             </Box>
         </Box>
