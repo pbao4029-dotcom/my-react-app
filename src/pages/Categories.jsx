@@ -83,7 +83,7 @@ export default function Categories({
 
     return (
         <Box sx={{ width: '100%' }}>
-            {/* Tiêu đề trang */}
+            {/* TIÊU ĐỀ */}
             <Box
                 sx={{
                     display: 'flex',
@@ -132,7 +132,6 @@ export default function Categories({
                         fontWeight: 700,
                         textTransform: 'none',
                         boxShadow: '0 4px 10px rgba(37,99,235,0.2)',
-
                         '&:hover': {
                             bgcolor: '#1d4ed8',
                             boxShadow: '0 6px 14px rgba(37,99,235,0.3)',
@@ -143,7 +142,7 @@ export default function Categories({
                 </Button>
             </Box>
 
-            {/* Thống kê nhanh */}
+            {/* THỐNG KÊ */}
             <Card
                 elevation={0}
                 sx={{
@@ -201,169 +200,188 @@ export default function Categories({
                 </CardContent>
             </Card>
 
-            {/* Danh sách danh mục */}
-            <Box
+            {/* DANH SÁCH DANH MỤC */}
+            <Card
+                elevation={0}
                 sx={{
-                    display: 'grid',
-                    gridTemplateColumns: {
-                        xs: '1fr',
-                        sm: 'repeat(2, 1fr)',
-                        lg: 'repeat(3, 1fr)',
-                    },
-                    gap: 2,
+                    borderRadius: 3,
+                    border: '1px solid #e2e8f0',
+                    overflow: 'hidden',
                 }}
             >
-                {categories.map((category) => {
-                    const count = products.filter(
-                        (product) =>
-                            String(product.category).trim().toLowerCase() ===
-                            category.trim().toLowerCase()
-                    ).length;
+                <Box
+                    sx={{
+                        p: 2.5,
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                    }}
+                >
+                    <Typography
+                        variant="h6"
+                        fontWeight={800}
+                        color="#172554"
+                    >
+                        Danh sách danh mục
+                    </Typography>
 
-                    return (
-                        <Card
-                            key={category}
-                            elevation={0}
+                    <Chip
+                        label={`${categories.length} danh mục`}
+                        size="small"
+                        sx={{
+                            bgcolor: '#dbeafe',
+                            color: '#1d4ed8',
+                            fontWeight: 700,
+                        }}
+                    />
+                </Box>
+
+                <Divider />
+
+                {categories.length === 0 ? (
+                    <Box
+                        sx={{
+                            py: 6,
+                            textAlign: 'center',
+                        }}
+                    >
+                        <CategoryIcon
                             sx={{
-                                borderRadius: 3,
-                                border: '1px solid #e2e8f0',
-                                transition: 'all 0.25s ease',
+                                fontSize: 50,
+                                color: '#94a3b8',
+                                mb: 1,
+                            }}
+                        />
 
-                                '&:hover': {
-                                    transform: 'translateY(-4px)',
-                                    borderColor: '#93c5fd',
-                                    boxShadow:
-                                        '0 8px 22px rgba(15,23,42,0.07)',
-                                },
+                        <Typography
+                            sx={{
+                                color: '#64748b',
+                                fontWeight: 600,
                             }}
                         >
-                            <CardContent sx={{ p: 2.5 }}>
+                            Chưa có danh mục nào
+                        </Typography>
+
+                        <Typography
+                            variant="body2"
+                            sx={{ color: '#94a3b8', mt: 0.5 }}
+                        >
+                            Hãy thêm danh mục đầu tiên của bạn.
+                        </Typography>
+                    </Box>
+                ) : (
+                    categories.map((category, index) => {
+                        const count = products.filter(
+                            (product) =>
+                                String(product.category).trim().toLowerCase() ===
+                                category.trim().toLowerCase()
+                        ).length;
+
+                        return (
+                            <Box key={category}>
                                 <Box
                                     sx={{
                                         display: 'flex',
+                                        alignItems: 'center',
                                         justifyContent: 'space-between',
-                                        alignItems: 'flex-start',
+                                        gap: 2,
+                                        px: 2.5,
+                                        py: 2,
+                                        transition: 'background 0.2s ease',
+                                        '&:hover': {
+                                            bgcolor: '#f8fafc',
+                                        },
                                     }}
                                 >
                                     <Box
                                         sx={{
-                                            width: 48,
-                                            height: 48,
-                                            borderRadius: 2.5,
-                                            bgcolor: '#eff6ff',
-                                            color: '#2563eb',
                                             display: 'flex',
                                             alignItems: 'center',
-                                            justifyContent: 'center',
+                                            gap: 2,
+                                            minWidth: 0,
                                         }}
                                     >
-                                        <Inventory2Outlined
-                                            sx={{ fontSize: 27 }}
-                                        />
+                                        <Box
+                                            sx={{
+                                                width: 42,
+                                                height: 42,
+                                                flexShrink: 0,
+                                                borderRadius: 2,
+                                                bgcolor: '#eff6ff',
+                                                color: '#2563eb',
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                justifyContent: 'center',
+                                            }}
+                                        >
+                                            <Inventory2Outlined />
+                                        </Box>
+
+                                        <Box sx={{ minWidth: 0 }}>
+                                            <Typography
+                                                fontWeight={700}
+                                                color="#172554"
+                                                sx={{
+                                                    overflowWrap: 'anywhere',
+                                                }}
+                                            >
+                                                {category}
+                                            </Typography>
+
+                                            <Typography
+                                                variant="caption"
+                                                color="text.secondary"
+                                            >
+                                                Danh mục #{index + 1}
+                                            </Typography>
+                                        </Box>
                                     </Box>
 
-                                    <IconButton
-                                        onClick={() =>
-                                            handleDelete(category)
-                                        }
-                                        aria-label={`Xóa ${category}`}
+                                    <Box
                                         sx={{
-                                            color: '#94a3b8',
-                                            '&:hover': {
-                                                color: '#dc2626',
-                                                bgcolor: '#fee2e2',
-                                            },
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: 1.5,
+                                            flexShrink: 0,
                                         }}
                                     >
-                                        <Delete />
-                                    </IconButton>
+                                        <Chip
+                                            label={`${count} sản phẩm`}
+                                            size="small"
+                                            sx={{
+                                                bgcolor: '#dbeafe',
+                                                color: '#1d4ed8',
+                                                fontWeight: 700,
+                                                borderRadius: 1.5,
+                                            }}
+                                        />
+
+                                        <IconButton
+                                            onClick={() => handleDelete(category)}
+                                            aria-label={`Xóa ${category}`}
+                                            sx={{
+                                                color: '#94a3b8',
+                                                '&:hover': {
+                                                    color: '#dc2626',
+                                                    bgcolor: '#fee2e2',
+                                                },
+                                            }}
+                                        >
+                                            <Delete />
+                                        </IconButton>
+                                    </Box>
                                 </Box>
 
-                                <Typography
-                                    sx={{
-                                        mt: 2,
-                                        mb: 1.5,
-                                        color: '#172554',
-                                        fontSize: 17,
-                                        fontWeight: 700,
-                                        overflowWrap: 'anywhere',
-                                    }}
-                                >
-                                    {category}
-                                </Typography>
+                                {index !== categories.length - 1 && (
+                                    <Divider />
+                                )}
+                            </Box>
+                        );
+                    })
+                )}
+            </Card>
 
-                                <Divider sx={{ mb: 1.5 }} />
-
-                                <Box
-                                    sx={{
-                                        display: 'flex',
-                                        justifyContent: 'space-between',
-                                        alignItems: 'center',
-                                    }}
-                                >
-                                    <Typography
-                                        variant="body2"
-                                        sx={{ color: '#64748b' }}
-                                    >
-                                        Sản phẩm
-                                    </Typography>
-
-                                    <Chip
-                                        label={`${count} sản phẩm`}
-                                        size="small"
-                                        sx={{
-                                            bgcolor: '#dbeafe',
-                                            color: '#1d4ed8',
-                                            fontWeight: 700,
-                                            borderRadius: 1.5,
-                                        }}
-                                    />
-                                </Box>
-                            </CardContent>
-                        </Card>
-                    );
-                })}
-            </Box>
-
-            {/* Trạng thái chưa có danh mục */}
-            {categories.length === 0 && (
-                <Card
-                    elevation={0}
-                    sx={{
-                        mt: 2,
-                        py: 6,
-                        textAlign: 'center',
-                        border: '1px dashed #cbd5e1',
-                        borderRadius: 3,
-                    }}
-                >
-                    <CategoryIcon
-                        sx={{
-                            fontSize: 50,
-                            color: '#94a3b8',
-                            mb: 1,
-                        }}
-                    />
-
-                    <Typography
-                        sx={{
-                            color: '#64748b',
-                            fontWeight: 600,
-                        }}
-                    >
-                        Chưa có danh mục nào
-                    </Typography>
-
-                    <Typography
-                        variant="body2"
-                        sx={{ color: '#94a3b8', mt: 0.5 }}
-                    >
-                        Hãy thêm danh mục đầu tiên của bạn.
-                    </Typography>
-                </Card>
-            )}
-
-            {/* Dialog thêm danh mục */}
+            {/* DIALOG THÊM DANH MỤC */}
             <Dialog
                 open={open}
                 onClose={() => setOpen(false)}
@@ -453,7 +471,6 @@ export default function Categories({
                             px: 3,
                             fontWeight: 700,
                             textTransform: 'none',
-
                             '&:hover': {
                                 bgcolor: '#1d4ed8',
                             },
